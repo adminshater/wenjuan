@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>数学课堂体验问卷 | 独立后台统计系统</title>
+    <title>数学课堂体验问卷</title>
     <style>
         * {
             margin: 0;
@@ -13,27 +13,9 @@
 
         body {
             font-family: 'Segoe UI', 'Roboto', 'Poppins', 'Inter', system-ui, sans-serif;
-            background: #eef2f7;
-        }
-
-        /* 双页面独立布局：通过 display 切换，模拟“单独一页”效果 */
-        .page {
-            transition: all 0.2s ease;
-            min-height: 100vh;
-        }
-
-        .page.active-page {
-            display: block;
-        }
-
-        .page.hidden-page {
-            display: none;
-        }
-
-        /* 问卷页面样式 */
-        .survey-page {
             background: linear-gradient(145deg, #e9f5ff 0%, #d9e9fa 100%);
             padding: 2rem 1rem;
+            min-height: 100vh;
         }
 
         .survey-container {
@@ -219,387 +201,172 @@
             color: #5d7184;
         }
 
-        /* 完成页面 (单独一页) */
-        .completion-page {
-            background: linear-gradient(135deg, #e0f0e8 0%, #c8e0d4 100%);
+        /* 完成弹窗风格 (提交后独立完成页) */
+        .completion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 2rem;
+            z-index: 2000;
+            animation: fadeIn 0.2s;
         }
-
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .completion-card {
-            max-width: 600px;
             background: white;
-            border-radius: 2.5rem;
-            padding: 2.5rem;
+            border-radius: 2rem;
+            max-width: 500px;
+            width: 90%;
+            padding: 2rem;
             text-align: center;
-            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.15);
-            animation: fadeUp 0.4s ease;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.2);
         }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-
-        .completion-card h2 {
-            font-size: 2rem;
-            color: #1f4e6e;
-            margin: 1rem 0;
-        }
-
-        .completion-card p {
-            color: #2c5a7a;
-            margin-bottom: 1.8rem;
-            font-size: 1.05rem;
-        }
-
+        .completion-card h2 { color: #1f4e6e; margin: 0.8rem 0; }
+        .completion-card p { color: #2c5a7a; margin-bottom: 1.5rem; }
         .btn-return {
             background: #ffb347;
             color: white;
             border: none;
-            padding: 12px 32px;
+            padding: 10px 24px;
             border-radius: 60px;
             font-weight: bold;
-            font-size: 1rem;
             cursor: pointer;
-            transition: 0.2s;
+            margin: 0 0.5rem;
         }
-
-        .btn-return:hover {
-            background: #f5a623;
-            transform: scale(1.02);
-        }
-
-        /* 后台独立页面 (不集成在主问卷页，新标签风格) */
-        .admin-page {
-            background: #f4f7fc;
-            padding: 2rem 1rem;
-            min-height: 100vh;
-        }
-
-        .admin-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 2rem;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            padding: 1.8rem 2rem;
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-            border-bottom: 3px solid #ffb347;
-            padding-bottom: 1rem;
-        }
-
-        .admin-header h1 {
-            font-size: 1.8rem;
-            color: #1f4e6e;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .stat-card {
-            background: #f9fbfe;
-            border-radius: 1.2rem;
-            padding: 1rem 1.2rem;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-            border-left: 5px solid #ffb347;
-        }
-
-        .stat-title {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #2c3e66;
-            margin-bottom: 0.7rem;
-        }
-
-        .stat-bar-container {
-            background: #e2e8f0;
-            border-radius: 20px;
-            height: 8px;
-            margin: 6px 0;
-        }
-
-        .stat-bar {
-            background: #ffb347;
-            width: 0%;
-            height: 100%;
-            border-radius: 20px;
-        }
-
-        .badge-count {
-            background: #ffb34720;
-            border-radius: 40px;
-            padding: 0.2rem 0.6rem;
-            font-size: 0.75rem;
-        }
-
-        .clear-btn {
-            background: #eef2f7;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .refresh-note {
+        .admin-hint {
             margin-top: 1rem;
-            text-align: center;
             font-size: 0.75rem;
-            color: #6c86a3;
         }
-
-        button {
-            font-family: inherit;
+        .admin-hint a {
+            color: #ffb347;
+            text-decoration: underline;
         }
-
-        @media (max-width: 700px) {
-            .admin-container { padding: 1rem; }
+        .error-msg {
+            color: #c23d2b;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        @media (max-width: 640px) {
+            .survey-container { margin: 0; }
+            form { padding: 1rem; }
         }
     </style>
 </head>
 <body>
-
-<!-- 页面1：问卷填写主页面 -->
-<div id="surveyPage" class="page survey-page active-page">
-    <div class="survey-container">
-        <div class="header">
-            <h1>📐 数学课堂体验调查 ✖️➗</h1>
-            <div class="subhead">你的真实反馈，让数学课堂更精彩</div>
-        </div>
-        <div class="progress-area">
-            <div class="progress-text" id="progressText">0 / 6 已完成</div>
-            <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
-        </div>
-        <form id="mathSurveyForm">
-            <!-- Q1 整体满意度 1-5 -->
-            <div class="question-card">
-                <div class="q-title">1. 你对数学课堂的整体满意度？<span class="required-star">*</span></div>
-                <div class="rating-numbers" id="q1_group">
-                    <label class="rating-number"><input type="radio" name="q1_satisfaction" value="1"> 1</label>
-                    <label class="rating-number"><input type="radio" name="q1_satisfaction" value="2"> 2</label>
-                    <label class="rating-number"><input type="radio" name="q1_satisfaction" value="3"> 3</label>
-                    <label class="rating-number"><input type="radio" name="q1_satisfaction" value="4"> 4</label>
-                    <label class="rating-number"><input type="radio" name="q1_satisfaction" value="5"> 5</label>
-                </div>
-                <div style="font-size:0.7rem; color:#6b8dae;">1-不满意 → 5-非常满意</div>
-            </div>
-            <!-- Q2 互动频率 -->
-            <div class="question-card">
-                <div class="q-title">2. 数学课堂的互动频率？<span class="required-star">*</span></div>
-                <div class="options-group">
-                    <label class="radio-option"><input type="radio" name="q2_interaction" value="非常频繁"> 非常频繁</label>
-                    <label class="radio-option"><input type="radio" name="q2_interaction" value="比较多"> 比较多</label>
-                    <label class="radio-option"><input type="radio" name="q2_interaction" value="一般"> 一般</label>
-                    <label class="radio-option"><input type="radio" name="q2_interaction" value="很少"> 很少</label>
-                </div>
-            </div>
-            <!-- Q3 难度 -->
-            <div class="question-card">
-                <div class="q-title">3. 课堂内容难度感受？<span class="required-star">*</span></div>
-                <div class="options-group">
-                    <label class="radio-option"><input type="radio" name="q3_difficulty" value="太简单"> 太简单</label>
-                    <label class="radio-option"><input type="radio" name="q3_difficulty" value="适中"> 适中</label>
-                    <label class="radio-option"><input type="radio" name="q3_difficulty" value="偏难"> 偏难</label>
-                    <label class="radio-option"><input type="radio" name="q3_difficulty" value="非常难"> 非常难</label>
-                </div>
-            </div>
-            <!-- Q4 教学方式多选 -->
-            <div class="question-card">
-                <div class="q-title">4. 你喜欢的教学方式？（多选）<span class="required-star">*</span></div>
-                <div class="options-group">
-                    <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="小组合作探究"> 小组合作探究</label>
-                    <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="多媒体/动画演示"> 多媒体/动画演示</label>
-                    <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="趣味数学游戏"> 趣味数学游戏</label>
-                    <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="传统板书讲解"> 传统板书讲解</label>
-                    <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="实际应用案例"> 实际应用案例</label>
-                </div>
-            </div>
-            <!-- Q5 氛围评分 -->
-            <div class="question-card">
-                <div class="q-title">5. 课堂氛围评价 (1压抑→5轻松愉悦)<span class="required-star">*</span></div>
-                <div class="rating-numbers" id="q5_group">
-                    <label class="rating-number"><input type="radio" name="q5_atmosphere" value="1"> 1</label>
-                    <label class="rating-number"><input type="radio" name="q5_atmosphere" value="2"> 2</label>
-                    <label class="rating-number"><input type="radio" name="q5_atmosphere" value="3"> 3</label>
-                    <label class="rating-number"><input type="radio" name="q5_atmosphere" value="4"> 4</label>
-                    <label class="rating-number"><input type="radio" name="q5_atmosphere" value="5"> 5</label>
-                </div>
-            </div>
-            <!-- Q6 兴趣提升 -->
-            <div class="question-card">
-                <div class="q-title">6. 数学兴趣提升情况？<span class="required-star">*</span></div>
-                <div class="options-group">
-                    <label class="radio-option"><input type="radio" name="q6_interest" value="明显提升"> 明显提升</label>
-                    <label class="radio-option"><input type="radio" name="q6_interest" value="稍有提升"> 稍有提升</label>
-                    <label class="radio-option"><input type="radio" name="q6_interest" value="没变化"> 没变化</label>
-                    <label class="radio-option"><input type="radio" name="q6_interest" value="有所下降"> 有所下降</label>
-                </div>
-            </div>
-            <!-- Q7 建议 -->
-            <div class="question-card">
-                <div class="q-title">7. 你的改进建议 (选填)</div>
-                <textarea name="suggestions" rows="2" placeholder="让数学课堂更棒的点子..."></textarea>
-            </div>
-            <div class="action-buttons">
-                <button type="button" id="resetBtn">🔄 重置问卷</button>
-                <button type="button" id="submitBtn" class="primary-btn">📊 提交问卷</button>
-            </div>
-            <div id="formErrorMsg" style="margin-top: 12px; font-size:0.8rem; color:#c23d2b; text-align:center;"></div>
-        </form>
-        <footer>📊 问卷数据独立存储于后台统计系统</footer>
+<div class="survey-container">
+    <div class="header">
+        <h1>📐 数学课堂体验调查 ✖️➗</h1>
+        <div class="subhead">你的真实反馈，让数学课堂更精彩</div>
     </div>
-</div>
-
-<!-- 页面2：完成问卷后单独显示的完成页 -->
-<div id="completionPage" class="page completion-page hidden-page">
-    <div class="completion-card">
-        <div style="font-size: 4rem;">🎉📐</div>
-        <h2>问卷提交成功！</h2>
-        <p>感谢你参与数学课堂体验调查，你的反馈已存入后台统计系统。<br>教师们会认真参考每一份建议。</p>
-        <button id="returnToSurveyBtn" class="btn-return">📝 再填一份问卷</button>
-        <div style="margin-top: 1rem; font-size:0.8rem;">
-            <a href="#" id="openAdminLink" style="color:#ffb347; text-decoration: underline;">📊 查看独立后台统计 (新窗口)</a>
-        </div>
+    <div class="progress-area">
+        <div class="progress-text" id="progressText">0 / 6 已完成</div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
     </div>
-</div>
-
-<!-- 页面3：后台统计独立模块（不集成在主问卷页，但独立页面，不嵌入主页，单独区域） -->
-<div id="adminPage" class="page admin-page hidden-page">
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1>📊 数学课堂问卷 · 后台统计系统</h1>
-            <button id="clearAllDataBtn" class="clear-btn">🗑️ 清空全部数据</button>
+    <form id="mathSurveyForm">
+        <!-- Q1 满意度 -->
+        <div class="question-card">
+            <div class="q-title">1. 你对数学课堂的整体满意度？<span class="required-star">*</span></div>
+            <div class="rating-numbers" id="q1_group">
+                <label class="rating-number"><input type="radio" name="q1_satisfaction" value="1"> 1</label>
+                <label class="rating-number"><input type="radio" name="q1_satisfaction" value="2"> 2</label>
+                <label class="rating-number"><input type="radio" name="q1_satisfaction" value="3"> 3</label>
+                <label class="rating-number"><input type="radio" name="q1_satisfaction" value="4"> 4</label>
+                <label class="rating-number"><input type="radio" name="q1_satisfaction" value="5"> 5</label>
+            </div>
+            <div style="font-size:0.7rem; color:#6b8dae;">1-不满意 → 5-非常满意</div>
         </div>
-        <div id="dynamicStatsPanel" class="stats-grid">
-            <!-- 动态渲染统计卡片 -->
-            <div class="stat-card">加载统计数据中...</div>
+        <!-- Q2 互动频率 -->
+        <div class="question-card">
+            <div class="q-title">2. 数学课堂的互动频率？<span class="required-star">*</span></div>
+            <div class="options-group">
+                <label class="radio-option"><input type="radio" name="q2_interaction" value="非常频繁"> 非常频繁</label>
+                <label class="radio-option"><input type="radio" name="q2_interaction" value="比较多"> 比较多</label>
+                <label class="radio-option"><input type="radio" name="q2_interaction" value="一般"> 一般</label>
+                <label class="radio-option"><input type="radio" name="q2_interaction" value="很少"> 很少</label>
+            </div>
         </div>
-        <div class="refresh-note">
-            ✅ 实时数据同步 | 总计提交: <strong id="totalCountSpan">0</strong> 份问卷
+        <!-- Q3 难度 -->
+        <div class="question-card">
+            <div class="q-title">3. 课堂内容难度感受？<span class="required-star">*</span></div>
+            <div class="options-group">
+                <label class="radio-option"><input type="radio" name="q3_difficulty" value="太简单"> 太简单</label>
+                <label class="radio-option"><input type="radio" name="q3_difficulty" value="适中"> 适中</label>
+                <label class="radio-option"><input type="radio" name="q3_difficulty" value="偏难"> 偏难</label>
+                <label class="radio-option"><input type="radio" name="q3_difficulty" value="非常难"> 非常难</label>
+            </div>
         </div>
-        <div style="margin-top: 1rem; text-align: right;">
-            <button id="closeAdminBtn" style="background:#eef2f7; padding:5px 18px;">← 关闭后台</button>
+        <!-- Q4 多选 -->
+        <div class="question-card">
+            <div class="q-title">4. 你喜欢的教学方式？（多选）<span class="required-star">*</span></div>
+            <div class="options-group">
+                <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="小组合作探究"> 小组合作探究</label>
+                <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="多媒体/动画演示"> 多媒体/动画演示</label>
+                <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="趣味数学游戏"> 趣味数学游戏</label>
+                <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="传统板书讲解"> 传统板书讲解</label>
+                <label class="checkbox-option"><input type="checkbox" name="q4_methods" value="实际应用案例"> 实际应用案例</label>
+            </div>
         </div>
-    </div>
+        <!-- Q5 氛围 -->
+        <div class="question-card">
+            <div class="q-title">5. 课堂氛围评价 (1压抑→5轻松愉悦)<span class="required-star">*</span></div>
+            <div class="rating-numbers" id="q5_group">
+                <label class="rating-number"><input type="radio" name="q5_atmosphere" value="1"> 1</label>
+                <label class="rating-number"><input type="radio" name="q5_atmosphere" value="2"> 2</label>
+                <label class="rating-number"><input type="radio" name="q5_atmosphere" value="3"> 3</label>
+                <label class="rating-number"><input type="radio" name="q5_atmosphere" value="4"> 4</label>
+                <label class="rating-number"><input type="radio" name="q5_atmosphere" value="5"> 5</label>
+            </div>
+        </div>
+        <!-- Q6 兴趣 -->
+        <div class="question-card">
+            <div class="q-title">6. 数学兴趣提升情况？<span class="required-star">*</span></div>
+            <div class="options-group">
+                <label class="radio-option"><input type="radio" name="q6_interest" value="明显提升"> 明显提升</label>
+                <label class="radio-option"><input type="radio" name="q6_interest" value="稍有提升"> 稍有提升</label>
+                <label class="radio-option"><input type="radio" name="q6_interest" value="没变化"> 没变化</label>
+                <label class="radio-option"><input type="radio" name="q6_interest" value="有所下降"> 有所下降</label>
+            </div>
+        </div>
+        <!-- Q7 建议 -->
+        <div class="question-card">
+            <div class="q-title">7. 你的改进建议 (选填)</div>
+            <textarea name="suggestions" rows="2" placeholder="让数学课堂更棒的点子..."></textarea>
+        </div>
+        <div class="action-buttons">
+            <button type="button" id="resetBtn">🔄 重置问卷</button>
+            <button type="button" id="submitBtn" class="primary-btn">📊 提交问卷</button>
+        </div>
+        <div id="formErrorMsg" class="error-msg" style="text-align:center;"></div>
+    </form>
+    <footer>
+        🔐 教师可访问 <a href="admin.html" target="_blank" style="color:#ffb347; text-decoration:underline;">独立后台统计 (需密码)</a>
+    </footer>
 </div>
 
 <script>
-    // ------------------- 模拟后台数据存储 (localStorage) ------------------
-    let surveyResponses = [];    // 存储所有答卷
+    // ---------- 问卷逻辑 + 存储至 localStorage (与 admin.html 共享) ----------
+    let surveyResponses = [];
 
-    // 初始化统计数据对象
-    let stats = {
-        total: 0,
-        satisfaction: {1:0,2:0,3:0,4:0,5:0},
-        interaction: {"非常频繁":0,"比较多":0,"一般":0,"很少":0},
-        difficulty: {"太简单":0,"适中":0,"偏难":0,"非常难":0},
-        teachingMethods: {"小组合作探究":0,"多媒体/动画演示":0,"趣味数学游戏":0,"传统板书讲解":0,"实际应用案例":0},
-        atmosphere: {1:0,2:0,3:0,4:0,5:0},
-        interest: {"明显提升":0,"稍有提升":0,"没变化":0,"有所下降":0},
-        suggestionsList: []
-    };
-
-    // 加载本地数据
-    function loadDataFromStorage() {
+    // 加载现有数据
+    function loadData() {
         const stored = localStorage.getItem("math_survey_backend");
         if(stored) {
-            try {
-                surveyResponses = JSON.parse(stored);
-                recomputeStats();
-            } catch(e) { console.warn(e); }
+            try { surveyResponses = JSON.parse(stored); } catch(e) { surveyResponses = []; }
         } else {
-            // 没有任何数据时为空数组，但为了展示demo 不给示例数据保持纯净
             surveyResponses = [];
-            recomputeStats();
-        }
-        // 如果后台可见则刷新UI
-        if(document.getElementById('adminPage').classList.contains('active-page')) {
-            renderStatsUI();
-        }
-        updateTotalSpan();
-    }
-
-    function recomputeStats() {
-        stats = {
-            total: surveyResponses.length,
-            satisfaction: {1:0,2:0,3:0,4:0,5:0},
-            interaction: {"非常频繁":0,"比较多":0,"一般":0,"很少":0},
-            difficulty: {"太简单":0,"适中":0,"偏难":0,"非常难":0},
-            teachingMethods: {"小组合作探究":0,"多媒体/动画演示":0,"趣味数学游戏":0,"传统板书讲解":0,"实际应用案例":0},
-            atmosphere: {1:0,2:0,3:0,4:0,5:0},
-            interest: {"明显提升":0,"稍有提升":0,"没变化":0,"有所下降":0},
-            suggestionsList: []
-        };
-        for(let resp of surveyResponses) {
-            if(resp.q1) stats.satisfaction[resp.q1] = (stats.satisfaction[resp.q1]||0)+1;
-            if(resp.q2) stats.interaction[resp.q2] = (stats.interaction[resp.q2]||0)+1;
-            if(resp.q3) stats.difficulty[resp.q3] = (stats.difficulty[resp.q3]||0)+1;
-            if(resp.q4 && Array.isArray(resp.q4)){
-                resp.q4.forEach(m => { if(stats.teachingMethods[m] !== undefined) stats.teachingMethods[m]++; });
-            }
-            if(resp.q5) stats.atmosphere[resp.q5] = (stats.atmosphere[resp.q5]||0)+1;
-            if(resp.q6) stats.interest[resp.q6] = (stats.interest[resp.q6]||0)+1;
-            if(resp.suggestion && resp.suggestion.trim() !== "") stats.suggestionsList.push(resp.suggestion);
         }
     }
 
-    function saveToLocalStorage() {
+    function saveData() {
         localStorage.setItem("math_survey_backend", JSON.stringify(surveyResponses));
-        recomputeStats();
-        // 实时更新后台UI (如果后台页面当前激活)
-        if(document.getElementById('adminPage').classList.contains('active-page')) {
-            renderStatsUI();
-        }
-        updateTotalSpan();
-    }
-
-    function updateTotalSpan() {
-        const totalSpan = document.getElementById('totalCountSpan');
-        if(totalSpan) totalSpan.innerText = stats.total;
-    }
-
-    // 渲染后台统计 (独立页面)
-    function renderStatsUI() {
-        const container = document.getElementById('dynamicStatsPanel');
-        if(!container) return;
-        const total = stats.total;
-        const getPercent = (count) => total === 0 ? 0 : ((count/total)*100).toFixed(1);
-        let satSum = 0, satCount = 0;
-        for(let i=1;i<=5;i++){ satSum += i * (stats.satisfaction[i]||0); satCount += (stats.satisfaction[i]||0); }
-        const avgSat = satCount>0 ? (satSum/satCount).toFixed(1) : '—';
-        let atmSum=0, atmCount=0;
-        for(let i=1;i<=5;i++){ atmSum += i * (stats.atmosphere[i]||0); atmCount += (stats.atmosphere[i]||0); }
-        const avgAtm = atmCount>0 ? (atmSum/atmCount).toFixed(1) : '—';
-
-        const html = `
-            <div class="stat-card"><div class="stat-title">📋 总参与人数: ${total}</div><div>⭐ 平均满意度: ${avgSat}/5 &nbsp; 🎈 平均氛围: ${avgAtm}/5</div></div>
-            <div class="stat-card"><div class="stat-title">😊 满意度分布</div>${[1,2,3,4,5].map(v=>{ let cnt=stats.satisfaction[v]||0; let p=getPercent(cnt); return `<div>${v}分 ${cnt}人 (${p}%)<div class="stat-bar-container"><div class="stat-bar" style="width:${p}%"></div></div></div>`; }).join('')}</div>
-            <div class="stat-card"><div class="stat-title">🗣️ 互动频率</div>${Object.entries(stats.interaction).map(([k,v])=>`<div>${k}: ${v}人 (${getPercent(v)}%)<div class="stat-bar-container"><div class="stat-bar" style="width:${getPercent(v)}%"></div></div></div>`).join('')}</div>
-            <div class="stat-card"><div class="stat-title">📐 难度感受</div>${Object.entries(stats.difficulty).map(([k,v])=>`<div>${k}: ${v}人 (${getPercent(v)}%)<div class="stat-bar-container"><div class="stat-bar" style="width:${getPercent(v)}%"></div></div></div>`).join('')}</div>
-            <div class="stat-card"><div class="stat-title">❤️ 受欢迎教学方式(多选计数)</div>${Object.entries(stats.teachingMethods).map(([k,v])=>`<div>${k}: ${v}次 <div class="stat-bar-container"><div class="stat-bar" style="width:${total===0?0:Math.min(100,(v/total)*100)}%"></div></div></div>`).join('')}</div>
-            <div class="stat-card"><div class="stat-title">📈 兴趣提升</div>${Object.entries(stats.interest).map(([k,v])=>`<div>${k}: ${v}人 (${getPercent(v)}%)<div class="stat-bar-container"><div class="stat-bar" style="width:${getPercent(v)}%"></div></div></div>`).join('')}</div>
-            <div class="stat-card"><div class="stat-title">💬 最新建议 (最近3条)</div><div style="font-size:0.75rem;">${stats.suggestionsList.slice(-3).reverse().map(s=>`“${s.substring(0,80)}”`).join('<br>') || '暂无建议'}</div></div>
-        `;
-        container.innerHTML = html;
-        updateTotalSpan();
     }
 
     // 获取当前表单数据
@@ -625,7 +392,7 @@
         return err;
     }
 
-    // 重置表单内容 + 样式
+    // 重置表单 & 进度
     function resetSurveyForm() {
         document.getElementById('mathSurveyForm').reset();
         document.querySelectorAll('.rating-number').forEach(el => el.classList.remove('selected'));
@@ -633,7 +400,7 @@
         updateProgressBar();
     }
 
-    // 进度条
+    // 进度条逻辑
     function computeCompleted() {
         let c = 0;
         if(document.querySelector('input[name="q1_satisfaction"]:checked')) c++;
@@ -652,103 +419,84 @@
         document.getElementById('progressText').innerText = `${comp}/${totalReq} 已完成`;
     }
 
-    // 提交问卷逻辑：保存数据 -> 重置问卷 -> 跳转到完成页
-    function submitAndRedirect() {
+    // 显示完成浮层 (独立完成页效果)
+    function showCompletionModal() {
+        // 遮罩
+        const overlay = document.createElement('div');
+        overlay.className = 'completion-overlay';
+        overlay.innerHTML = `
+            <div class="completion-card">
+                <div style="font-size: 3rem;">🎉📐</div>
+                <h2>问卷提交成功！</h2>
+                <p>感谢参与数学课堂体验调查，你的反馈已存入统计系统。</p>
+                <div>
+                    <button id="closeCompletionBtn" class="btn-return">📝 再填一份</button>
+                </div>
+                <div class="admin-hint">
+                    🔐 教师可<a href="admin.html" target="_blank">进入独立后台</a>查看统计数据 (需密码)
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        const closeBtn = overlay.querySelector('#closeCompletionBtn');
+        closeBtn.addEventListener('click', () => {
+            overlay.remove();
+            // 重置问卷表单，回到填写状态
+            resetSurveyForm();
+        });
+    }
+
+    // 提交主逻辑
+    function submitSurvey() {
         const data = getCurrentFormData();
         const errors = validateFormData(data);
         if(errors.length > 0) {
             document.getElementById('formErrorMsg').innerText = "❌ " + errors.join("；");
             return;
         }
-        // 保存答卷到后台
+        // 存储新答卷
         const record = {
-            q1: data.q1, q2: data.q2, q3: data.q3, q4: data.q4, q5: data.q5, q6: data.q6,
-            suggestion: data.suggestion || "",
+            q1: data.q1, q2: data.q2, q3: data.q3, q4: data.q4,
+            q5: data.q5, q6: data.q6, suggestion: data.suggestion || "",
             timestamp: Date.now()
         };
+        loadData();            // 拉取最新
         surveyResponses.push(record);
-        saveToLocalStorage();   // 持久化并刷新统计
-
-        // 重置问卷表单 (清空所有输入)
+        saveData();
+        // 重置表单，清空当前填写内容 (自动重置)
         resetSurveyForm();
-        // 显示完成页面 (隐藏问卷页)
-        document.getElementById('surveyPage').classList.remove('active-page');
-        document.getElementById('surveyPage').classList.add('hidden-page');
-        document.getElementById('completionPage').classList.remove('hidden-page');
-        document.getElementById('completionPage').classList.add('active-page');
+        // 显示独立完成浮层 (相当于单独一页完成页面)
+        showCompletionModal();
     }
 
-    // 回到问卷页 (再填一份)
-    function backToSurvey() {
-        resetSurveyForm();
-        document.getElementById('completionPage').classList.remove('active-page');
-        document.getElementById('completionPage').classList.add('hidden-page');
-        document.getElementById('surveyPage').classList.remove('hidden-page');
-        document.getElementById('surveyPage').classList.add('active-page');
-    }
-
-    // 独立打开后台页面 (新窗口)
-    function openAdminInNewWindow() {
-        // 直接切换当前视图到后台独立页（不集成在主页，但依然在同一标签中，但看起来独立）
-        // 要求“后台单独出来不要集成在主页”，通过隐藏问卷/完成页，只展示后台页，实现独立模块感。
-        document.getElementById('surveyPage').classList.add('hidden-page');
-        document.getElementById('completionPage').classList.add('hidden-page');
-        document.getElementById('adminPage').classList.remove('hidden-page');
-        document.getElementById('adminPage').classList.add('active-page');
-        renderStatsUI(); // 刷新数据
-    }
-
-    function closeAdminAndBack() {
-        document.getElementById('adminPage').classList.remove('active-page');
-        document.getElementById('adminPage').classList.add('hidden-page');
-        document.getElementById('surveyPage').classList.remove('hidden-page');
-        document.getElementById('surveyPage').classList.add('active-page');
-        resetSurveyForm();
-    }
-
-    function clearAllData() {
-        if(confirm("⚠️ 确定清空所有问卷数据吗？不可恢复。")) {
-            surveyResponses = [];
-            saveToLocalStorage();
-            renderStatsUI();
-            resetSurveyForm();
-        }
-    }
-
-    // 绑定样式评分
+    // 样式绑定评分高亮
     function bindRatingStyles() {
         document.querySelectorAll('.rating-numbers').forEach(group => {
-            group.querySelectorAll('input[type="radio"]').forEach(radio => {
+            const radios = group.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     group.querySelectorAll('.rating-number').forEach(lbl => lbl.classList.remove('selected'));
-                    if(this.checked) this.closest('.rating-number')?.classList.add('selected');
+                    if(this.checked) {
+                        const parent = this.closest('.rating-number');
+                        if(parent) parent.classList.add('selected');
+                    }
                 });
-                if(radio.checked) radio.closest('.rating-number')?.classList.add('selected');
+                if(radio.checked) {
+                    const parent = radio.closest('.rating-number');
+                    if(parent) parent.classList.add('selected');
+                }
             });
         });
     }
 
-    function initEventListeners() {
-        document.getElementById('submitBtn').addEventListener('click', submitAndRedirect);
-        document.getElementById('resetBtn').addEventListener('click', resetSurveyForm);
-        document.getElementById('returnToSurveyBtn').addEventListener('click', backToSurvey);
-        document.getElementById('openAdminLink')?.addEventListener('click', (e) => { e.preventDefault(); openAdminInNewWindow(); });
-        document.getElementById('closeAdminBtn')?.addEventListener('click', closeAdminAndBack);
-        document.getElementById('clearAllDataBtn')?.addEventListener('click', clearAllData);
-        const inputs = document.querySelectorAll('#mathSurveyForm input, #mathSurveyForm textarea');
-        inputs.forEach(inp => inp.addEventListener('change', updateProgressBar));
-    }
-
     function init() {
-        loadDataFromStorage();
+        loadData();
         bindRatingStyles();
         updateProgressBar();
-        initEventListeners();
-        // 默认激活问卷页
-        document.getElementById('surveyPage').classList.add('active-page');
-        document.getElementById('surveyPage').classList.remove('hidden-page');
-        document.getElementById('completionPage').classList.add('hidden-page');
-        document.getElementById('adminPage').classList.add('hidden-page');
+        document.getElementById('submitBtn').addEventListener('click', submitSurvey);
+        document.getElementById('resetBtn').addEventListener('click', resetSurveyForm);
+        const inputs = document.querySelectorAll('#mathSurveyForm input, #mathSurveyForm textarea');
+        inputs.forEach(inp => inp.addEventListener('change', updateProgressBar));
     }
     init();
 </script>
