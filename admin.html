@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>数学课堂问卷 | 管理员后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Poppins', 'Inter', system-ui, sans-serif;
+            background: #f0f2f6;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+
+        /* 后台容器 */
+        .admin-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 密码保护界面 */
+        .login-container {
+            max-width: 450px;
+            margin: 10vh auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+        }
+        .login-container h2 {
+            color: #1f4e6e;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .login-container p {
+            color: #5d7184;
+            margin-bottom: 1.5rem;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 60px;
+            border: 1.5px solid #dce5ef;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .login-container button {
+            background: #ffb347;
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .login-container button:hover {
+            background: #f5a623;
+            transform: translateY(-2px);
+        }
+        .login-error {
+            color: #c23d2b;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* 后台主面板 (登录后可见) */
+        .admin-panel {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            animation: fadeSlide 0.3s ease;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(15px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .admin-header {
+            background: linear-gradient(135deg, #1f4e6e, #2c3e66);
+            padding: 1.5rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .admin-header h1 {
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+        }
+        .btn-danger {
+            background: #c23d2b;
+            border: none;
+        }
+        .btn-danger:hover {
+            background: #a03424;
+        }
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1.8rem 2rem;
+            background: #f9fbfe;
+            border-bottom: 1px solid #e9edf2;
+        }
+        .stat-big-card {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #eef2f8;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1f4e6e;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6c86a3;
+            margin-top: 5px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 1.8rem 2rem;
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border-left: 5px solid #ffb347;
+            transition: 0.1s;
+        }
+        .stat-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #2c3e66;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-bar-container {
+            background: #e2e8f0;
+            border-radius: 20px;
+            height: 8px;
+            margin: 8px 0 4px;
+            overflow: hidden;
+        }
+        .stat-bar {
+            background: #ffb347;
+            width: 0%;
+            height: 100%;
+            border-radius: 20px;
+        }
+        .row-flex {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        .suggestions-box {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            background: #f8fafd;
+            padding: 0.6rem;
+            border-radius: 1rem;
+            margin-top: 8px;
+        }
+        .suggestion-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .footer-note {
+            background: #eef3fa;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #5d7184;
+            border-top: 1px solid #e2e8f0;
+        }
+        .refresh-time {
+            font-size: 0.7rem;
+            margin-top: 8px;
+        }
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+        @media (max-width: 700px) {
+            .stats-grid { padding: 1rem; }
+            .stats-summary { padding: 1rem; }
+            .admin-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper" id="adminApp">
+    <!-- 登录界面 -->
+    <div id="loginView" style="display: block;">
+        <div class="login-container">
+            <h2>🔐 管理员后台登录</h2>
+            <p>请输入密码访问问卷统计面板</p>
+            <input type="password" id="adminPassword" placeholder="管理员密码" autocomplete="off">
+            <button id="loginBtn">验证并进入</button>
+            <div id="loginMsg" class="login-error"></div>
+            <div style="margin-top: 1.5rem; font-size: 0.7rem; color:#aaa;">
+                <span>📌 演示密码: <strong style="color:#ffb347;">math2025</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 后台主界面 (登录后显示) -->
+    <div id="dashboardView" style="display: none;">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h1>📊 数学课堂问卷 · 数据后台 <span class="badge">管理员模式</span></h1>
+                <div class="header-actions">
+                    <button id="refreshDataBtn" class="btn-outline">🔄 刷新数据</button>
+                    <button id="clearAllDataBtn" class="btn-outline" style="border-color:#c23d2b;">🗑️ 清空全部</button>
+                    <button id="logoutBtn" class="btn-outline">🚪 退出登录</button>
+                </div>
+            </div>
+            <!-- 概要卡片 -->
+            <div class="stats-summary" id="summaryCards">
+                <div class="stat-big-card"><div class="stat-number" id="totalCount">0</div><div class="stat-label">总提交问卷数</div></div>
+                <div class="stat-big-card"><div class="stat-number" id="avgSatisfaction">—</div><div class="stat-label">平均满意度 (1-5)</div></div>
+                <div class="stat-big-card"><div class="stat-number" id="avgAtmosphere">—</div><div class="stat-label">平均课堂氛围 (1-5)</div></div>
+                <div class="stat-big-card"><div class="stat-number" id="positiveInterest">0%</div><div class="stat-label">兴趣提升占比 (明显+稍有)</div></div>
+            </div>
+
+            <div class="stats-grid" id="statsGridContainer">
+                <!-- 动态渲染统计卡片 -->
+                <div class="stat-card">加载统计数据中...</div>
+            </div>
+            <div class="footer-note">
+                📌 数据基于 localStorage 存储，与问卷页面实时同步。<br>
+                最后更新: <span id="lastUpdateTime">—</span>
+                <div class="refresh-time">✨ 教师可随时刷新查看最新问卷结果</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 管理员后台逻辑，独立 admin.html 与问卷页面共享 localStorage 键值 ----------
+    const ADMIN_PASSWORD = "math2025";    // 预设密码 (可修改)
+    let currentResponses = [];            // 存储从localStorage加载的问卷原始数据
+    
+    // DOM 元素
+    const loginView = document.getElementById('loginView');
+    const dashboardView = document.getElementById('dashboardView');
+    const loginBtn = document.getElementById('loginBtn');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const loginMsg = document.getElementById('loginMsg');
+    const refreshBtn = document.getElementById('refreshDataBtn');
+    const clearAllBtn = document.getElementById('clearAllDataBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // 更新显示元素
+    const totalCountSpan = document.getElementById('totalCount');
+    const avgSatisfactionSpan = document.getElementById('avgSatisfaction');
+    const avgAtmosphereSpan = document.getElementById('avgAtmosphere');
+    const positiveInterestSpan = document.getElementById('positiveInterest');
+    const lastUpdateSpan = document.getElementById('lastUpdateTime');
+    
+    // 加载原始数据 (从 localStorage)
+    function loadRawData() {
+        const stored = localStorage.getItem("math_survey_backend");
+        if (stored) {
+            try {
+                currentResponses = JSON.parse(stored);
+                if (!Array.isArray(currentResponses)) currentResponses = [];
+            } catch(e) {
+                console.warn("解析失败", e);
+                currentResponses = [];
+            }
+        } else {
+            currentResponses = [];
+        }
+        updateLastUpdateTime();
+        return currentResponses;
+    }
+    
+    function updateLastUpdateTime() {
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        if (lastUpdateSpan) lastUpdateSpan.innerText = timeStr;
+    }
+    
+    // 根据原始数据计算所有统计指标
+    function computeStatistics(responses) {
+        const total = responses.length;
+        // 满意度汇总
+        let satisfactionSum = 0, satisfactionCount = 0;
+        let atmosphereSum = 0, atmosphereCount = 0;
+        let interestPositive = 0; // 明显提升+稍有提升
+        
+        const satisfactionDist = {1:0,2:0,3:0,4:0,5:0};
+        const interactionDist = {"非常频繁":0,"比较多":0,"一般":0,"很少":0};
+        const difficultyDist = {"太简单":0,"适中":0,"偏难":0,"非常难":0};
+        const teachingMethodsCount = {"小组合作探究":0,"多媒体/动画演示":0,"趣味数学游戏":0,"传统板书讲解":0,"实际应用案例":0};
+        const atmosphereDist = {1:0,2:0,3:0,4:0,5:0};
+        const interestDist = {"明显提升":0,"稍有提升":0,"没变化":0,"有所下降":0};
+        const suggestionList = [];
+        
+        for (let resp of responses) {
+            // 满意度 q1
+            if (resp.q1 && typeof resp.q1 === 'number') {
+                satisfactionSum += resp.q1;
+                satisfactionCount++;
+                if (satisfactionDist[resp.q1] !== undefined) satisfactionDist[resp.q1]++;
+            } else if (resp.q1 && typeof resp.q1 === 'string') { // 兼容字符串转数字
+                let val = parseInt(resp.q1);
+                if (!isNaN(val)) {
+                    satisfactionSum += val;
+                    satisfactionCount++;
+                    if (satisfactionDist[val]) satisfactionDist[val]++;
+                }
+            }
+            // 互动 q2
+            if (resp.q2 && interactionDist[resp.q2] !== undefined) interactionDist[resp.q2]++;
+            // 难度 q3
+            if (resp.q3 && difficultyDist[resp.q3] !== undefined) difficultyDist[resp.q3]++;
+            // 教学方式 q4 (数组)
+            if (resp.q4 && Array.isArray(resp.q4)) {
+                resp.q4.forEach(m => {
+                    if (teachingMethodsCount[m] !== undefined) teachingMethodsCount[m]++;
+                });
+            }
+            // 氛围 q5
+            if (resp.q5) {
+                let atmVal = typeof resp.q5 === 'number' ? resp.q5 : parseInt(resp.q5);
+                if (!isNaN(atmVal) && atmVal >=1 && atmVal <=5) {
+                    atmosphereSum += atmVal;
+                    atmosphereCount++;
+                    if (atmosphereDist[atmVal] !== undefined) atmosphereDist[atmVal]++;
+                }
+            }
+            // 兴趣 q6
+            if (resp.q6 && interestDist[resp.q6] !== undefined) {
+                interestDist[resp.q6]++;
+                if (resp.q6 === "明显提升" || resp.q6 === "稍有提升") interestPositive++;
+            }
+            // 建议
+            if (resp.suggestion && resp.suggestion.trim() !== "") {
+                suggestionList.push(resp.suggestion.trim());
+            }
+        }
+        
+        const avgSat = satisfactionCount > 0 ? (satisfactionSum / satisfactionCount).toFixed(1) : "—";
+        const avgAtm = atmosphereCount > 0 ? (atmosphereSum / atmosphereCount).toFixed(1) : "—";
+        const positivePercent = total > 0 ? ((interestPositive / total) * 100).toFixed(1) : "0";
+        
+        return {
+            total,
+            avgSat,
+            avgAtm,
+            positivePercent,
+            satisfactionDist,
+            interactionDist,
+            difficultyDist,
+            teachingMethodsCount,
+            atmosphereDist,
+            interestDist,
+            suggestionList
+        };
+    }
+    
+    // 渲染所有统计卡片
+    function renderDashboard() {
+        const data = loadRawData();   // 更新 currentResponses
+        const stats = computeStatistics(currentResponses);
+        const total = stats.total;
+        
+        // 更新顶部摘要
+        if (totalCountSpan) totalCountSpan.innerText = total;
+        if (avgSatisfactionSpan) avgSatisfactionSpan.innerText = stats.avgSat;
+        if (avgAtmosphereSpan) avgAtmosphereSpan.innerText = stats.avgAtm;
+        if (positiveInterestSpan) positiveInterestSpan.innerText = stats.positivePercent + "%";
+        
+        // 辅助函数 百分比
+        const getPercent = (count) => total === 0 ? 0 : ((count / total) * 100).toFixed(1);
+        
+        // 构建详细卡片 HTML
+        const container = document.getElementById('statsGridContainer');
+        if (!container) return;
+        
+        const satHtml = `
+            <div class="stat-card">
+                <div class="stat-title">😊 满意度分布</div>
+                ${[1,2,3,4,5].map(v => {
+                    let cnt = stats.satisfactionDist[v] || 0;
+                    let percent = getPercent(cnt);
+                    return `<div>${v}分 (${cnt}人) <span style="float:right">${percent}%</span><div class="stat-bar-container"><div class="stat-bar" style="width:${percent}%"></div></div></div>`;
+                }).join('')}
+            </div>
+        `;
+        
+        const interactionHtml = `
+            <div class="stat-card">
+                <div class="stat-title">🗣️ 课堂互动频率</div>
+                ${Object.entries(stats.interactionDist).map(([key, cnt]) => {
+                    let percent = getPercent(cnt);
+                    return `<div>${key} (${cnt}人) <span style="float:right">${percent}%</span><div class="stat-bar-container"><div class="stat-bar" style="width:${percent}%"></div></div></div>`;
+                }).join('')}
+            </div>
+        `;
+        
+        const difficultyHtml = `
+            <div class="stat-card">
+                <div class="stat-title">📐 难度感受</div>
+                ${Object.entries(stats.difficultyDist).map(([key, cnt]) => {
+                    let percent = getPercent(cnt);
+                    return `<div>${key} (${cnt}人) <span style="float:right">${percent}%</span><div class="stat-bar-container"><div class="stat-bar" style="width:${percent}%"></div></div></div>`;
+                }).join('')}
+            </div>
+        `;
+        
+        const methodHtml = `
+            <div class="stat-card">
+                <div class="stat-title">❤️ 受欢迎教学方式 (多选计数)</div>
+                ${Object.entries(stats.teachingMethodsCount).map(([key, cnt]) => {
+                    let maxPossible = total;
+                    let barWidth = maxPossible === 0 ? 0 : (cnt / maxPossible * 100).toFixed(1);
+                    return `<div>${key} <span style="float:right">${cnt} 次</span><div class="stat-bar-container"><div class="stat-bar" style="width:${barWidth}%"></div></div></div>`;
+                }).join('')}
+                <div class="refresh-time" style="margin-top:6px;">※ 基于总人数 ${total} 的提及次数</div>
+            </div>
+        `;
+        
+        const atmosphereHtml = `
+            <div class="stat-card">
+                <div class="stat-title">🎈 氛围评分 (1压抑→5轻松)</div>
+                ${[1,2,3,4,5].map(v => {
+                    let cnt = stats.atmosphereDist[v] || 0;
+                    let percent = getPercent(cnt);
+                    return `<div>${v}分 (${cnt}人) <span style="float:right">${percent}%</span><div class="stat-bar-container"><div class="stat-bar" style="width:${percent}%"></div></div></div>`;
+                }).join('')}
+            </div>
+        `;
+        
+        const interestHtml = `
+            <div class="stat-card">
+                <div class="stat-title">📈 兴趣变化趋势</div>
+                ${Object.entries(stats.interestDist).map(([key, cnt]) => {
+                    let percent = getPercent(cnt);
+                    return `<div>${key} (${cnt}人) <span style="float:right">${percent}%</span><div class="stat-bar-container"><div class="stat-bar" style="width:${percent}%"></div></div></div>`;
+                }).join('')}
+            </div>
+        `;
+        
+        const suggestionsHtml = `
+            <div class="stat-card">
+                <div class="stat-title">💬 学生建议 / 反馈摘录</div>
+                <div class="suggestions-box">
+                    ${stats.suggestionList.length === 0 ? '<div style="color:#aaa;">暂无建议</div>' : 
+                      stats.suggestionList.slice(-8).reverse().map(s => `<div class="suggestion-item">📝 “${escapeHtml(s.substring(0, 120))}”</div>`).join('')}
+                </div>
+                <div class="refresh-time" style="margin-top:8px;">共 ${stats.suggestionList.length} 条建议，最新显示</div>
+            </div>
+        `;
+        
+        container.innerHTML = satHtml + interactionHtml + difficultyHtml + methodHtml + atmosphereHtml + interestHtml + suggestionsHtml;
+        updateLastUpdateTime();
+    }
+    
+    // 简单防XSS
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // 清空全部数据 (需要二次确认)
+    function clearAllData() {
+        if (confirm("⚠️ 警告：此操作将永久清空所有问卷数据，无法恢复！是否继续？")) {
+            localStorage.setItem("math_survey_backend", JSON.stringify([]));
+            loadRawData();   // 重新加载空数组
+            renderDashboard();
+            // 可弹出短暂提示
+            alert("✅ 所有问卷数据已清空");
+        }
+    }
+    
+    // 刷新数据 (重新从localStorage加载并渲染)
+    function refreshData() {
+        loadRawData();
+        renderDashboard();
+    }
+    
+    // 退出登录，返回登录界面
+    function logout() {
+        dashboardView.style.display = 'none';
+        loginView.style.display = 'block';
+        adminPasswordInput.value = '';
+        loginMsg.innerText = '';
+    }
+    
+    // 登录验证
+    function attemptLogin() {
+        const pwd = adminPasswordInput.value.trim();
+        if (pwd === ADMIN_PASSWORD) {
+            loginView.style.display = 'none';
+            dashboardView.style.display = 'block';
+            // 登录后立刻加载数据并渲染
+            refreshData();
+        } else {
+            loginMsg.innerText = '密码错误，无权访问后台管理系统！';
+            adminPasswordInput.value = '';
+            adminPasswordInput.focus();
+        }
+    }
+    
+    // 检查是否已经登录 (通过url参数? 或者 sessionStorage 保持简单？本次使用常规登录，关闭标签页即失效，更安全)
+    // 无自动登录，必须输入密码。
+    
+    // 事件绑定
+    function bindEvents() {
+        if (loginBtn) loginBtn.addEventListener('click', attemptLogin);
+        if (adminPasswordInput) adminPasswordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') attemptLogin();
+        });
+        if (refreshBtn) refreshBtn.addEventListener('click', refreshData);
+        if (clearAllBtn) clearAllBtn.addEventListener('click', clearAllData);
+        if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    }
+    
+    // 初始化后台: 显示登录页，隐藏面板
+    function init() {
+        bindEvents();
+        loginView.style.display = 'block';
+        dashboardView.style.display = 'none';
+        // 预加载原始数据但不展示 (用户登录后再展示)
+        loadRawData();
+    }
+    
+    init();
+</script>
+</body>
+</html>
